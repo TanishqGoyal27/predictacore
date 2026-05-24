@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PredictaCore — Industrial AI Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<!-- ─── HEADER ─────────────────────────────────────────────────────────── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="logo-mark"></div>
+    <div>
+      <span class="logo-text">PREDICTA<em>CORE</em></span>
+      <span class="logo-sub">Industrial Predictive Maintenance AI</span>
+    </div>
+  </div>
+  <div class="topbar-center">
+    <div class="status-pill" id="systemStatus">
+      <span class="status-dot"></span>
+      <span id="statusText">Initializing…</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="header-stat">
+      <span class="hs-label">THRESHOLD</span>
+      <span class="hs-val">0.30</span>
+    </div>
+    <div class="header-stat">
+      <span class="hs-label">STRATEGY</span>
+      <span class="hs-val recall-badge">RECALL-FIRST</span>
+    </div>
+  </div>
+</header>
+
+<!-- ─── MAIN GRID ──────────────────────────────────────────────────────── -->
+<main class="main-grid">
+
+  <!-- LEFT: Input Panel -->
+  <section class="panel input-panel">
+    <div class="panel-header">
+      <span class="panel-icon">⬡</span>
+      <h2>Machine Parameters</h2>
+    </div>
+    <p class="panel-sub">Enter live sensor readings to run the prediction engine.</p>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Machine Type</label>
+        <div class="type-buttons" id="typeButtons">
+          <button class="type-btn active" data-val="L">L — Low</button>
+          <button class="type-btn" data-val="M">M — Med</button>
+          <button class="type-btn" data-val="H">H — High</button>
+        </div>
+        <input type="hidden" id="typeInput" value="L" />
+      </div>
+
+      <div class="form-group">
+        <label for="airTemp">Air Temperature <span class="unit">[K]</span></label>
+        <div class="input-wrap">
+          <input type="number" id="airTemp" value="300.0" min="295.3" max="304.5" step="0.1" />
+          <span class="input-range">295.3 – 304.5</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="procTemp">Process Temperature <span class="unit">[K]</span></label>
+        <div class="input-wrap">
+          <input type="number" id="procTemp" value="310.0" min="305.7" max="313.8" step="0.1" />
+          <span class="input-range">305.7 – 313.8</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="rpm">Rotational Speed <span class="unit">[rpm]</span></label>
+        <div class="input-wrap">
+          <input type="number" id="rpm" value="1538" min="1168" max="2886" step="1" />
+          <span class="input-range">1168 – 2886</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="torque">Torque <span class="unit">[Nm]</span></label>
+        <div class="input-wrap">
+          <input type="number" id="torque" value="40.0" min="3.8" max="76.6" step="0.1" />
+          <span class="input-range">3.8 – 76.6</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="toolWear">Tool Wear <span class="unit">[min]</span></label>
+        <div class="input-wrap">
+          <input type="number" id="toolWear" value="108" min="0" max="253" step="1" />
+          <span class="input-range">0 – 253</span>
+        </div>
+        <div class="wear-bar-wrap">
+          <div class="wear-bar" id="wearBar"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="formError" class="form-error hidden"></div>
+
+    <div class="action-buttons">
+      <button class="btn-predict" id="predictBtn" onclick="runPredict()">
+        <span class="btn-icon">▶</span> Run Prediction
+      </button>
+      <button class="btn-simulate" id="simulateBtn" onclick="startSimulation()">
+        <span class="btn-icon">⟳</span> Simulate Monitoring
+      </button>
+    </div>
+
+    <div class="recall-notice">
+      <span class="notice-icon">ℹ</span>
+      System prioritizes <strong>recall</strong> to minimize missed failures. Threshold set at 0.30 (not 0.50).
+    </div>
+  </section>
+
+  <!-- CENTER: Results Dashboard -->
+  <section class="panel results-panel" id="resultsPanel">
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="spinner"></div>
+      <p id="loadingText">Running prediction engine…</p>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">◎</div>
+      <p>Enter machine parameters and run prediction</p>
+    </div>
+
+    <!-- Result cards (hidden until prediction) -->
+    <div class="results-content hidden" id="resultsContent">
+
+      <div class="result-header-row">
+        <div class="prediction-badge" id="predBadge">—</div>
+        <div class="prob-display">
+          <span class="prob-label">Failure Probability</span>
+          <span class="prob-val" id="probVal">—</span>
+        </div>
+      </div>
+
+      <div class="metric-cards">
+        <div class="metric-card" id="cardRisk">
+          <div class="mc-label">Risk Level</div>
+          <div class="mc-val" id="riskVal">—</div>
+          <div class="mc-bar-wrap"><div class="mc-bar" id="riskBar"></div></div>
+        </div>
+        <div class="metric-card" id="cardConf">
+          <div class="mc-label">Confidence</div>
+          <div class="mc-val" id="confVal">—</div>
+        </div>
+        <div class="metric-card" id="cardAnomaly">
+          <div class="mc-label">Anomaly Detected</div>
+          <div class="mc-val" id="anomalyVal">—</div>
+        </div>
+        <div class="metric-card" id="cardScore">
+          <div class="mc-label">Fusion Score</div>
+          <div class="mc-val" id="scoreVal">—</div>
+        </div>
+      </div>
+
+      <div class="causes-action-row">
+        <div class="causes-block">
+          <div class="block-label">Root Causes</div>
+          <div id="causesList" class="causes-list"></div>
+        </div>
+        <div class="action-block">
+          <div class="block-label">Recommended Action</div>
+          <div id="actionText" class="action-text">—</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- RIGHT: Charts -->
+  <section class="panel charts-panel">
+    <div class="panel-header">
+      <span class="panel-icon">◈</span>
+      <h2>Analytics</h2>
+    </div>
+
+    <div class="chart-block">
+      <div class="chart-label">Risk Score Gauge</div>
+      <div class="gauge-wrap">
+        <canvas id="gaugeChart" height="160"></canvas>
+        <div class="gauge-center-label" id="gaugeCenterLabel">—</div>
+      </div>
+    </div>
+
+    <div class="chart-block">
+      <div class="chart-label">Feature Impact (Root Cause Analysis)</div>
+      <canvas id="featureChart" height="180"></canvas>
+    </div>
+
+    <div class="chart-block">
+      <div class="chart-label">Probability Indicator</div>
+      <canvas id="probChart" height="80"></canvas>
+    </div>
+  </section>
+
+</main>
+
+<!-- ─── SIMULATION DRAWER ──────────────────────────────────────────────── -->
+<div class="sim-drawer" id="simDrawer">
+  <div class="sim-header">
+    <div class="sim-title">
+      <span class="panel-icon">⚙</span>
+      <h3>Live Monitoring Simulation</h3>
+      <div class="sim-live-dot"></div>
+      <span id="simCounter" class="sim-counter">0 / 8</span>
+    </div>
+    <button class="sim-close" onclick="closeSimulation()">✕</button>
+  </div>
+  <div class="sim-grid" id="simGrid">
+    <!-- Machine cards injected here -->
+  </div>
+</div>
+<div class="sim-backdrop" id="simBackdrop" onclick="closeSimulation()"></div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
