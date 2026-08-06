@@ -8,7 +8,7 @@ Built on the [AI4I 2020 Predictive Maintenance Dataset](https://archive.ics.uci.
 ![Flask](https://img.shields.io/badge/Flask-3.0-black?logo=flask)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3-F7931E?logo=scikit-learn&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
-https://github.com/TanishqGoyal27/predictacore/actions/workflows/ci.yml/badge.svg
+![CI](https://github.com/TanishqGoyal27/predictacore/actions/workflows/ci.yml/badge.svg)
 
 ---
 
@@ -29,7 +29,7 @@ All of this is surfaced through a Flask API and a real-time web dashboard.
 ## Screenshots
 
 | Dashboard |
-|---|---|
+
 > <img width="1901" height="961" alt="image" src="https://github.com/user-attachments/assets/96177f34-6583-4578-9786-dd86553c82cb" />
 ---
 
