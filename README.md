@@ -118,7 +118,7 @@ Raw sensor input (6 values)
 
 ```bash
 # 1. Clone
-git clone https://github.com/<your-username>/predictacore.git
+git clone https://github.com/TanishqGoyal27/predictacore.git
 cd predictacore
 
 # 2. Create and activate a virtual environment (recommended)
