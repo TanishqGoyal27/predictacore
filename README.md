@@ -28,12 +28,9 @@ All of this is surfaced through a Flask API and a real-time web dashboard.
 
 ## Screenshots
 
-> *Add screenshots here after first run. Suggested: dashboard overview, prediction result, live monitoring panel.*
-
 | Dashboard | Prediction Result |
 |---|---|
-| `docs/screenshots/dashboard.png` | `docs/screenshots/prediction.png` |
-
+> <img width="1901" height="961" alt="image" src="https://github.com/user-attachments/assets/96177f34-6583-4578-9786-dd86553c82cb" />
 ---
 
 ## Architecture
