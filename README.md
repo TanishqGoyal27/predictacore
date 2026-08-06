@@ -4,11 +4,6 @@
 
 Built on the [AI4I 2020 Predictive Maintenance Dataset](https://archive.ics.uci.edu/ml/datasets/AI4I+2020+Predictive+Maintenance+Dataset) as part of a study of industrial ML pipelines and the engineering challenges involved in combining supervised and unsupervised approaches.
 
-![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python&logoColor=white)
-![Flask](https://img.shields.io/badge/Flask-3.0-black?logo=flask)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3-F7931E?logo=scikit-learn&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green)
-![CI](https://github.com/TanishqGoyal27/predictacore/actions/workflows/ci.yml/badge.svg)
 
 ---
 
